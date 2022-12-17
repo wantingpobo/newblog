@@ -159,6 +159,7 @@ class ItemController extends Controller
     public function queryCgyRelation(Cgy $cgy)
     {
         // articles複數
+        //透過Cgy model的關係函式items()->直接取得所有,沒有要設定,不用加()
         return $cgy->items;
     }
 
@@ -180,6 +181,7 @@ class ItemController extends Controller
     public function getItemCgy(Item $item)
     {
         //指定文章的所屬分類->單數
+        //Item model裡的關係函式cgy
         return $item->cgy;
         // return "ok";
     }
@@ -201,12 +203,14 @@ class ItemController extends Controller
     {
         //tags複數
         return $item->tags;
+        // return $item;//可以return出來
     }
 
     //為指定的文章加入 id 為 tag_id 的標籤
     public function addTag(Item $item, $tag_id)
     {
         $tag = Tag::find($tag_id);
+        //save()用物件,detach()用主鍵id
         $item->tags()->save($tag);
         return $item->tags;
         // return 'addTag';
@@ -215,37 +219,41 @@ class ItemController extends Controller
     //為指定的文章移除 id 為 tag_id 的標籤
     public function removeTag(Item $item, $tag_id)
     {
-        $article->tags()->detach($tag_id);
-        return $article->tags;
-        return 'removeTag';
+        //關係函式tags()還要做處理所以要加()
+        //save()用物件,detach()用主鍵id
+        $item->tags()->detach($tag_id);
+        return $item->tags;
+        // return 'removeTag';
     }
 
     //將指定文章的標籤重新設定為 1 , 3 , 5
     public function syncTag(Item $item)
     {
-        $article->tags()->sync([1, 3, 5]);
-        return $article->tags;
-        return 'syncTag';
+        //叫出Item model裡的關係函式tags()
+        $item->tags()->sync([1, 3, 5]);
+        return $item->tags;
+        // return 'syncTag';
     }
 
     //為指定的文章加入 id 為 tag_id 的標籤，並設定標籤顏色
     public function addTagWithColor(Item $item, $tag_id, $color)
     {
         $tag = Tag::find($tag_id);
-        $article->tags()->save($tag, ['color' => '#' . $color]);
-        return $article->tags;
-        return 'addTagWithColor';
+        $item->tags()->save($tag, ['color' => '#' . $color]);
+        return $item->tags;
+        // return 'addTagWithColor';
     }
 
     //取得指定文章的所有標籤，連同該標籤建立的時間以及標籤顏色
     public function queryTagsWithColor(Item $item)
     {
-        return $article->tags;
+        return $item->tags;
     }
 
-    //取得文章連同其關聯的標籤
+    //取得文章連同其關聯的標籤(在關係函式都寫好with了)
     public function getItemWithTags(Item $item)
     {
-        return 'getArticleWithTags';
+        return $item->tags;
     }
+
 }

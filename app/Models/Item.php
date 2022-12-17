@@ -13,7 +13,7 @@ class Item extends Model
 
     protected $fillable = ['title', 'pic', 'price', 'enabled', 'desc', 'enabled_at', 'cgy_id'];
 
-    public function cgies()
+    public function cgy()
     {
         return $this->belongsTo(Cgy::class);
     }
@@ -21,6 +21,6 @@ class Item extends Model
     public function tags()
     {
         //多對多關係,有中介表
-        return $this->belongsToMany(Tag::class);
+        return $this->belongsToMany(Tag::class)->withTimestamps()->withPivot(['color']);
     }
 }
