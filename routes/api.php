@@ -19,3 +19,28 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('Items', 'App\Http\Controllers\Api\ItemController');
+
+Route::namespace ('App\Http\Controllers\Api')->prefix('Items/query')->group(function () {
+    //CRUD練習
+    Route::get('querySelect', 'ItemController@querySelect');
+    Route::get('querySpecific', 'ItemController@querySpecific');
+    Route::get('queryPagination', 'ItemController@queryPagination');
+    Route::get('queryRange/{min}/{max}', 'ItemController@queryRange');
+    Route::get('queryByCgy/{cgy}', 'ItemController@queryByCgy');
+    Route::get('queryPluck', 'ItemController@queryPluck');
+    Route::get('enabledCount', 'ItemController@enabledCount');
+
+    //關聯練習
+    Route::get('queryCgyRelation/{cgy}', 'ItemController@queryCgyRelation');
+    Route::get('changeCgy/{old_cgy_id}/{new_cgy_id}', 'ItemController@changeCgy');
+    Route::get('getItemCgy/{item}', 'ItemController@getItemCgy');
+    Route::get('changeAllCgy/{old_cgy_id}/{new_cgy_id}', 'ItemController@changeAllCgy');
+    Route::get('queryTags/{item}', 'ItemController@queryTags');
+    Route::get('addTag/{item}/{tag_id}', 'ItemController@addTag');
+    Route::get('removeTag/{item}/{tag_id}', 'ItemController@removeTag');
+    Route::get('syncTag/{item}', 'ItemController@syncTag');
+    Route::get('addTagWithColor/{item}/{tag_id}/{color}', 'ItemController@addTagWithColor');
+    Route::get('queryTagsWithColor/{item}', 'ItemController@queryTagsWithColor');
+    Route::get('getItemWithTags/{item}', 'ItemController@getItemWithTags');
+
+});
