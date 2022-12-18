@@ -8,9 +8,22 @@ use App\Models\Item;
 use App\Models\Tag;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Throwable;
 
 class ItemController extends Controller
 {
+
+    //用於生成 JSON 字串
+    //這個方法不會讓外部路由呼叫所以用private
+    //$status->請求api的結果是成功還失敗
+    //$data->要傳回前端的資料
+    //$msg->如果失敗要給什麼訊息
+    private function makeJson($status, $data, $msg)
+    {
+        //用return response()->json([])回傳json格式的陣列
+        //轉 JSON 時確保中文不會變成 Unicode
+        return response()->json(['status' => $status, 'data' => $data, 'message' => $msg])->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -20,8 +33,19 @@ class ItemController extends Controller
      */
     public function index()
     {
-        $items = Item::orderBy('cgy_id', 'asc')->get();
-        return $items;
+        // $items = Item::orderBy('cgy_id', 'asc')->get();
+        // return $items;
+
+        //RESTFUL API
+        $items = Item::get(); //取得Item table的所有資料
+        //先判斷是否為空值,再來算數量(如果沒有先判斷的話,是空的就會爆)
+        if (isset($items) && count($items) > 0) {
+            $data = ['items' => $items];
+            return $this->makeJson(1, $data, null);
+        } else {
+            return $this->makeJson(0, null, '找不到任何商品');
+        }
+
     }
 
     /**
@@ -35,8 +59,24 @@ class ItemController extends Controller
     public function store(Request $request)
     {
         //只能用all(),不能用get()
-        $item = Item::create($request->all());
-        return $item;
+        // $item = Item::create($request->all());
+        // return $item;
+
+        //RESTFUL API
+        //從前端得到資料
+        // $input = ['title' => $request->title, 'desc' => $request->desc];
+        // $input = $request->all();//不好的作法,即使前端回傳了我們不需要的資料還是得吃
+        $input = $request->only(['title', 'pic', 'price', 'enabled', 'desc', 'cgy_id']);
+        //用Item model的create()方法來建立一筆資料,把儲存的資料用$item變數丟回來
+        $item = Item::create($input);
+        //檢查$item這個實例是否存在,成功的話回傳id,失敗的話回傳訊息
+        if (isset($item)) {
+            $data = ['item_id' => $item->id];
+            return $this->makeJson(1, $data, '新增商品成功');
+        } else {
+            return $this->makeJson(0, null, '新增商品失敗');
+        }
+
     }
 
     /**
@@ -46,9 +86,22 @@ class ItemController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function show(Item $item)
+    public function show($id)
     {
-        return $item;
+        // dd($item);
+        // return $item; //public function show(Item $item)
+
+        //RESTFUL API
+        //用主鍵找到資料
+        $item = Item::find($id);
+
+        if (isset($item)) {
+            $data = ['item' => $item];
+            return $this->makeJson(1, $data, null);
+        } else {
+            return $this->makeJson(0, null, '找不到該商品');
+        }
+
     }
 
     // public function show($id)
@@ -77,8 +130,23 @@ class ItemController extends Controller
     public function update(Request $request, $id)
     {
 
-        $item = Item::where('id', $id)->update($request->all());
-        return "ok";
+        // $item = Item::where('id', $id)->update($request->all());
+        // return "ok";
+
+        //RESTFUL API
+        //把錯誤攔截下來:在try區域裡任何一行出現錯誤的話,會自動跳到catch出現錯誤訊息
+        try {
+            $item = Item::findOrFail($id);
+            $input = $request->only(['title', 'pic', 'price', 'enabled', 'desc', 'cgy_id']);
+            $item->update($input);
+            $item->save();
+        } catch (Throwable $e) {
+            //更新失敗
+            return $this->makeJson(0, null, '更新商品失敗');
+        }
+
+        $data = ['item' => $item];
+        return $this->makeJson(1, $data, '更新商品成功');
 
     }
 
@@ -97,9 +165,22 @@ class ItemController extends Controller
 
     public function destroy($id)
     {
-        $item = Item::where('id', $id)->delete();
-        return "ok";
+        // $item = Item::where('id', $id)->delete();
+        // return "ok";
+
+        //RESTFUL API
+        try {
+            $item = Item::findOrFail($id);
+            $item->delete();
+        } catch (Throwable $e) {
+            //刪除失敗
+            return $this->makeJson(0, null, '刪除文章失敗');
+        }
+        return $this->makeJson(1, null, '刪除文章成功');
+
     }
+
+//==================================================
 
     //查詢所有資料，只取 id , subject 以及 content 這三個欄位
     public function querySelect()
@@ -253,6 +334,7 @@ class ItemController extends Controller
     //取得文章連同其關聯的標籤(在關係函式都寫好with了)
     public function getItemWithTags(Item $item)
     {
+        // return Item::with('tags')->find($item->id)
         return $item->tags;
     }
 

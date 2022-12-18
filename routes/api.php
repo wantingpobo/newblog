@@ -44,3 +44,10 @@ Route::namespace ('App\Http\Controllers\Api')->prefix('Items/query')->group(func
     Route::get('getItemWithTags/{item}', 'ItemController@getItemWithTags');
 
 });
+
+//實作API的驗證機制
+Route::group(['prefix' => 'auth', 'namespace' => 'App\Http\Controllers\Api'], function () {
+    Route::get('/', 'AuthController@me')->name('me'); //找到目前的登入者
+    Route::post('login', 'AuthController@login')->name('login');
+    Route::post('logout', 'AuthController@logout')->name('logout');
+});

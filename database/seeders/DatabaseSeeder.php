@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ItemSeeder::class);
         $this->call(ItemTagSeeder::class);
         $this->call(TagSeeder::class);
+        $this->call(UserSeeder::class);
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
     }
