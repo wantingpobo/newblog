@@ -18,7 +18,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::apiResource('Items', 'App\Http\Controllers\Api\ItemController');
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('Items', 'App\Http\Controllers\Api\ItemController');
+});
 
 Route::namespace ('App\Http\Controllers\Api')->prefix('Items/query')->group(function () {
     //CRUD練習
@@ -43,6 +45,8 @@ Route::namespace ('App\Http\Controllers\Api')->prefix('Items/query')->group(func
     Route::get('queryTagsWithColor/{item}', 'ItemController@queryTagsWithColor');
     Route::get('getItemWithTags/{item}', 'ItemController@getItemWithTags');
 
+    //回家練習
+    Route::get('getwithCgy/{item}', 'ItemController@getwithCgy');
 });
 
 //實作API的驗證機制

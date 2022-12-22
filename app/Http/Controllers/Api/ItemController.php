@@ -180,6 +180,21 @@ class ItemController extends Controller
 
     }
 
+    //連商品分類一起抓
+    public function getwithCgy(Item $item)
+    {
+
+        $item = Item::with('cgy')->get();
+
+        if (isset($item)) {
+            $data = ['item' => $item];
+            return $this->makeJson(1, $data, null);
+        } else {
+            return $this->makeJson(0, null, '找不到該商品');
+        }
+
+    }
+
 //==================================================
 
     //查詢所有資料，只取 id , subject 以及 content 這三個欄位
